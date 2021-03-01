@@ -24,6 +24,11 @@
     <div id="mapid" style="width: 100%; height: 100vh;"></div>
     <script>
 console.log("dataZoom1:", dataZoom1);
+const server = {
+  getPoints: () => {
+    return dataZoom1;
+  },
+}
 
 var mymap = L.map('mapid').setView([0,0], 2);
 
@@ -47,30 +52,36 @@ const icon = L.icon({
   iconUrl: "./images/cluster_46px.png",
 });
 
-dataZoom1.data.forEach(d => {
-	L.marker(
-    d.centroid.coordinates.reverse(),
-    {
-      icon: new L.DivIcon({
-        className: "greenstand-cluster",
-        html: `
-          <div class="greenstand-cluster-box" data-zoom-target="${dataZoom1.zoomTargets.filter(t => t.region_id === d.id)[0].centroid.coordinates.reverse().toString()}" >
-          <div>${d.count}</div>
-          </div>
-        `,
-      }),
+const request = () => {
+  const data = server.getPoints();
+  data.data.forEach(d => {
+    L.marker(
+      d.centroid.coordinates.reverse(),
+      {
+        icon: new L.DivIcon({
+          className: "greenstand-cluster",
+          html: `
+            <div class="greenstand-cluster-box" data-zoom-target="${data.zoomTargets.filter(t => t.region_id === d.id)[0].centroid.coordinates.reverse().toString()}" >
+            <div>${d.count}</div>
+            </div>
+          `,
+        }),
+      }
+    ).on('click', (e) => {
+      console.log("event:", e);
+      console.log("event.target:", e.target._icon);
+      const a = e.target._icon.querySelector(".greenstand-cluster-box").getAttribute("data-zoom-target").split(",").map(e => parseFloat(e));
+      console.log("a:", a);
+      const latlng = L.latLng(...a);
+      console.log("latlng:", latlng);
+      mymap.flyTo(latlng, mymap.getZoom() + 2);
     }
-  ).on('click', (e) => {
-    console.log("event:", e);
-    console.log("event.target:", e.target._icon);
-    const a = e.target._icon.querySelector(".greenstand-cluster-box").getAttribute("data-zoom-target").split(",").map(e => parseFloat(e));
-    console.log("a:", a);
-    const latlng = L.latLng(...a);
-    console.log("latlng:", latlng);
-    mymap.flyTo(latlng, mymap.getZoom() + 2);
-  }
-  ).addTo(mymap)
-});
+    ).addTo(mymap)
+  });
+}
+
+request();
+
 //	L.marker([51.5, -0.09]).addTo(mymap)
 //		.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
 
@@ -83,7 +94,7 @@ dataZoom1.data.forEach(d => {
 //			.openOn(mymap);
 //	}
 
-mymap.on('click', onMapClick);
+//mymap.on('click', onMapClick);
     </script>
   </body>
 </html>
