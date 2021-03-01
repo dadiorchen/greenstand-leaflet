@@ -120,13 +120,7 @@ const request = () => {
       ).on('click', (e) => {
         console.log("event:", e);
         console.log("event.target:", e.target._icon);
-        const a = e.target._icon.querySelector(".greenstand-cluster-box").getAttribute("data-zoom-target").split(",").map(e => parseFloat(e));
-        console.log("a:", a);
-        const latlng = L.latLng(...a);
-        console.log("latlng:", latlng);
-        mymap.flyTo(latlng, mymap.getZoom() + 2);
-      }
-      ).addTo(mymap)
+      }).addTo(mymap)
       markers.push(marker);
 
     }else{
